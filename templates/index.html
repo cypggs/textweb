@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .post {
+            border: 1px solid #ccc;
+            padding: 1em;
+            margin-bottom: 1em;
+        }
+        .timestamp {
+            font-size: 0.9em;
+            color: #666;
+            display: block;
+            margin-bottom: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Web</h1>
+    <textarea id="textarea" rows="10" cols="50"></textarea><br>
+    <button onclick="submit()">Submit</button>
+    <div id="content"></div>
+    <script>
+        function submit() {
+            var content = document.getElementById('textarea').value;
+            if (content.trim() === '') {
+                alert('内容不能为空');
+                return;
+            }
+            fetch('/api/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({content: content})
+            })
+            .then(response => {
+                console.log('Status: ', response.status, response.statusText);
+                if (response.status === 200) {
+                    return response.json();
+                } else {
+                    throw new Error('API error');
+                }
+            })
+            .then(data => {
+                console.log('Saved: ', data);
+                document.getElementById('textarea').value = '';
+                loadContent();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('提交保存失败');
+            });
+        }
+
+        function createPost(content, timestamp) {
+            var postDiv = document.createElement('div');
+            postDiv.className = 'post';
+            var timestampParagraph = document.createElement('p');
+            timestampParagraph.className = 'timestamp';
+            timestampParagraph.textContent = timestamp;
+            postDiv.appendChild(timestampParagraph);
+            var contentParagraph = document.createElement('p');
+            contentParagraph.textContent = content;
+            postDiv.appendChild(contentParagraph);
+            return postDiv;
+        }
+
+        function displayContent(data) {
+            var innerDiv = document.createElement('div');
+            data.forEach(item => {
+                innerDiv.appendChild(createPost(item.content, item.timestamp));
+            });
+            var contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '';
+            contentDiv.appendChild(innerDiv);
+        }
+
+        function loadContent() {
+            fetch('/api/load')
+            .then(response => {
+                console.log('Status: ', response.status, response.statusText);
+                if (response.status === 200) {
+                    return response.json();
+                } else {
+                    throw new Error('API error');
+                }
+            })
+            .then(data => {
+                console.log('Loaded: ', data);
+                if (typeof data === 'string' || !Array.isArray(data)) {
+                    console.error('Load content error: data is not an array');
+                    return;
+                }
+                displayContent(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('加载失败');
+            });
+        }
+
+        loadContent();
+    </script>
+</body>
+</html>
