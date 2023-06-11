@@ -34,12 +34,7 @@
             padding: 12px 24px;
             transition-duration: 0.4s;
         }
-        .delete-button {
-          background-color: #f44336;
-          font-size: 1em;
-          padding: 6px 12px;
-          margin-top: 8px;
-        }
+
     </style>
 </head>
 <body>
@@ -80,33 +75,7 @@
             });
         }
 
-        function deleteContent(id) {
-            fetch('/api/delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({id: id})
-            })
-            .then(response => {
-                console.log('Status: ', response.status, response.statusText);
-                if (response.status === 200) {
-                    return response.json();
-                } else {
-                    throw new Error('API error');
-                }
-            })
-            .then(data => {
-                console.log('Deleted: ', data);
-                loadContent();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('删除失败');
-            });
-        }
-
-        function createPost(id, content, timestamp) {
+        function createPost(content, timestamp) {
             var postDiv = document.createElement('div');
             postDiv.className = 'post';
 
@@ -120,20 +89,13 @@
             var converter = new showdown.Converter();
             contentDiv.innerHTML = converter.makeHtml(content);
             postDiv.appendChild(contentDiv);
-
-            var deleteButton = document.createElement('button');
-            deleteButton.className = 'delete-button';
-            deleteButton.textContent = '删除';
-            deleteButton.onclick = function() { deleteContent(id); };
-            postDiv.appendChild(deleteButton);
-
             return postDiv;
         }
 
         function displayContent(data) {
             var innerDiv = document.createElement('div');
             data.forEach(item => {
-                innerDiv.appendChild(createPost(item.id, item.content, item.timestamp));
+                innerDiv.appendChild(createPost(item.content, item.timestamp));
             });
             var contentDiv = document.getElementById('content');
             contentDiv.innerHTML = '';

@@ -34,6 +34,7 @@
             padding: 12px 24px;
             transition-duration: 0.4s;
         }
+
         .delete-button {
           background-color: #f44336;
           font-size: 1em;
@@ -43,9 +44,8 @@
     </style>
 </head>
 <body>
-    <h1>Text Web</h1>
-    <textarea id="textarea" rows="10" cols="100"></textarea><br>
-    <button onclick="submit()">Submit</button>
+    <h1>Text Web - Delete</h1>
+    <!-- 不需要输入框和提交按钮 -->
     <div id="content"></div>
     <script>
         function submit() {
@@ -80,6 +80,37 @@
             });
         }
 
+
+        function createPost(id, content, timestamp) {
+            var postDiv = document.createElement('div');
+            postDiv.className = 'post';
+
+            var timestampParagraph = document.createElement('p');
+            timestampParagraph.className = 'timestamp';
+            timestampParagraph.textContent = timestamp;
+
+            // 添加删除按钮
+             var deleteButton = document.createElement('span');
+            deleteButton.className = 'delete-button';
+            deleteButton.innerHTML = '&#x2716;';
+            deleteButton.onclick = function() { deleteContent(id); };
+            timestampParagraph.appendChild(deleteButton);
+
+            postDiv.appendChild(timestampParagraph);
+
+            var contentDiv = document.createElement('div');
+            var converter = new showdown.Converter();
+            contentDiv.innerHTML = converter.makeHtml(content);
+            postDiv.appendChild(contentDiv);
+
+            var deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-button';
+            deleteButton.textContent = '删除';
+            deleteButton.onclick = function() { deleteContent(id); };
+            postDiv.appendChild(deleteButton);
+
+            return postDiv;
+        }
         function deleteContent(id) {
             fetch('/api/delete', {
                 method: 'POST',
@@ -104,30 +135,6 @@
                 console.error('Error:', error);
                 alert('删除失败');
             });
-        }
-
-        function createPost(id, content, timestamp) {
-            var postDiv = document.createElement('div');
-            postDiv.className = 'post';
-
-            var timestampParagraph = document.createElement('p');
-            timestampParagraph.className = 'timestamp';
-            timestampParagraph.textContent = timestamp;
-
-            postDiv.appendChild(timestampParagraph);
-
-            var contentDiv = document.createElement('div');
-            var converter = new showdown.Converter();
-            contentDiv.innerHTML = converter.makeHtml(content);
-            postDiv.appendChild(contentDiv);
-
-            var deleteButton = document.createElement('button');
-            deleteButton.className = 'delete-button';
-            deleteButton.textContent = '删除';
-            deleteButton.onclick = function() { deleteContent(id); };
-            postDiv.appendChild(deleteButton);
-
-            return postDiv;
         }
 
         function displayContent(data) {

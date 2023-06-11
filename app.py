@@ -55,15 +55,17 @@ def api_load():
     contents = load_content(page)
     return jsonify(contents)
 
+@app.route('/del')
+def delete_page():
+    return render_template('delete.html')
+
 @app.route('/api/delete', methods=['POST'])
 def api_delete():
     data = request.get_json()
-    content_id = data.get('id', None)
-    if content_id:
-        delete_content(content_id)
-        return jsonify({'message': 'Deleted'})
-    else:
-        return jsonify({'message': 'Invalid ID'}), 400
+    content_id = data.get('id', '')
+    with sqlite3.connect(DATABASE) as conn:
+        conn.execute("DELETE FROM content WHERE id = ?", (content_id,))
+    return jsonify({'message': 'Deleted'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=88)

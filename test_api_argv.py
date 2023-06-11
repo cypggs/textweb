@@ -1,14 +1,16 @@
 import unittest
 import json
 from app import app
+import sys
 
 class APITestCase(unittest.TestCase):
 
     def test_save(self):
+        test_content = sys.argv[1]
         with app.test_client() as c:
             response = c.post(
                 "/api/save",
-                data=json.dumps({"content": "Test Content"}),
+                data=json.dumps({"content": test_content}),
                 content_type="application/json",
             )
             self.assertEqual(response.status_code, 200)
@@ -23,6 +25,4 @@ class APITestCase(unittest.TestCase):
             self.assertTrue(len(content_list) <= 20)
 
 if __name__ == "__main__":
-    unittest.main()
-
-#curl -X POST -H "Content-Type: application/json" -d '{"content": "你好"}' https://note.cypggs.com/api/save
+    unittest.main(argv=['first-arg-is-ignored'], exit=False)
