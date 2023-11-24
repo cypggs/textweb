@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Page</title>
+</head>
+<body>
+    <h1>Edit Page</h1>
+    <div id="content-list">
+        {% for content in contents %}
+            <div class="content-item">
+                <h2>Content ID: {{ content.id }}</h2>
+                <textarea id="content-{{ content.id }}">{{ content.content }}</textarea>
+                <button onclick="saveChanges({{ content.id }})">Save Changes</button>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        function saveChanges(id) {
+            var newContent = document.getElementById('content-' + id).value;
+            fetch('/edit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id,
+                    content: newContent
+                })
+            }).then(function(response) {
+                return response.json();
+            }).then(function(data) {
+                alert(data.message);
+            });
+        }
+    </script>
+</body>
+</html>

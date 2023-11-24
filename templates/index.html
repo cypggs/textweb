@@ -5,8 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Web</title>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script> -->
-    <script src="./showdown.min.js"></script>
+    <script src="{{ url_for('static', filename='showdown.min.js') }}"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,14 +52,36 @@
                 width: auto;
             }
         }
+
     </style>
 </head>
+
 <body>
     <h1>Text Web</h1>
-    <textarea id="textarea" rows="10" cols="100"></textarea><br>
+    <textarea id="textarea" rows="10" cols="100" onkeydown="handleKeyDown(event)"></textarea><br>
     <button onclick="submit()">Submit</button>
     <div id="content"></div>
+    <div id="button-container">
+        <button id="prev-page" onclick="prevPage()">Previous Page</button>
+        <button onclick="showAll()">Show All</button>
+        <button id="next-page" onclick="nextPage()">Next Page</button>
+    </div>
+    <style>
+        #button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
     <script>
+        var currentPage = 1;
+
+        function handleKeyDown(event) {
+            if (event.shiftKey && event.key === 'Enter') {
+                event.preventDefault();
+                submit();
+            }
+        }
+
         function submit() {
             var content = document.getElementById('textarea').value;
             if (content.trim() === '') {
@@ -85,7 +106,7 @@
             .then(data => {
                 console.log('Saved: ', data);
                 document.getElementById('textarea').value = '';
-                loadContent();
+                loadContent(currentPage, 10);
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -120,8 +141,8 @@
             contentDiv.appendChild(innerDiv);
         }
 
-        function loadContent() {
-            fetch('/api/load')
+        function loadContent(page, limit) {
+            fetch('/api/load?page=' + page + '&limit=' + limit)
             .then(response => {
                 console.log('Status: ', response.status, response.statusText);
                 if (response.status === 200) {
@@ -144,7 +165,21 @@
             });
         }
 
-        loadContent();
+        function prevPage() {
+            if (currentPage > 1) {
+                loadContent(--currentPage, 10);
+            }
+        }
+
+        function nextPage() {
+            loadContent(++currentPage, 10);
+        }
+
+        function showAll() {
+            loadContent(1, 999999999);
+        }
+
+        loadContent(currentPage, 10);
     </script>
 </body>
 </html>
